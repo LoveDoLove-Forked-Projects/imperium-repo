@@ -144,7 +144,7 @@ internal class LevelGeneration : ImperiumWindow
         var dropdownBinding = new ImpBinding<int>(-1);
         dropdownBinding.OnUpdate += value =>
         {
-            var newModule = value >= 0 ? Imperium.ObjectManager.LoadedModules.Value[value].name : "";
+            var newModule = value >= 0 ? Imperium.ObjectManager.LoadedModules.Value[value].PrefabName : "";
             if (Imperium.GameManager.ModuleOverride.Value != newModule)
             {
                 Imperium.GameManager.ModuleOverride.Set(newModule);
@@ -161,7 +161,7 @@ internal class LevelGeneration : ImperiumWindow
 
             for (var i = 0; i < Imperium.ObjectManager.LoadedModules.Value.Count; i++)
             {
-                if (Imperium.ObjectManager.LoadedModules.Value[i].name == value)
+                if (Imperium.ObjectManager.LoadedModules.Value[i].PrefabName == value)
                 {
                     dropdownBinding.Set(i);
                     break;
@@ -169,7 +169,7 @@ internal class LevelGeneration : ImperiumWindow
             }
         };
 
-        var options = Imperium.ObjectManager.LoadedModules.Value.Select(module => NormalizeModuleName(module.name));
+        var options = Imperium.ObjectManager.LoadedModules.Value.Select(module => NormalizeModuleName(module.PrefabName));
 
         ImpDropdown.Bind(
             "ModuleOverride",

@@ -28,7 +28,6 @@ using ImpSettings = Imperium.Core.ImpSettings;
 namespace Imperium;
 
 [BepInDependency("com.rune580.reposteamnetworking")]
-[BepInDependency("REPOLib")]
 [BepInDependency("giosuel.Librarium")]
 [BepInDependency("com.sinai.universelib", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("com.sinai.unityexplorer", BepInDependency.DependencyFlags.SoftDependency)]

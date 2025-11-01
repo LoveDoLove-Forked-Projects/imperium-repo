@@ -10,7 +10,6 @@ using Imperium.Types;
 using Imperium.Util;
 using Librarium.Binding;
 using Photon.Pun;
-using REPOLib.Modules;
 using UnityEngine;
 
 #endregion
@@ -31,9 +30,9 @@ internal class ObjectManager : ImpLifecycleObject
      * Loaded when Imperium initializes (Stage 1).
      */
     internal readonly ImpBinding<IReadOnlyList<Level>> LoadedLevels = new([]);
-    internal readonly ImpBinding<IReadOnlyList<Module>> LoadedModules = new([]);
-    internal readonly ImpBinding<IReadOnlyCollection<Item>> LoadedItems = new([]);
-    internal readonly ImpBinding<IReadOnlyCollection<ValuableObject>> LoadedValuables = new([]);
+    internal readonly ImpBinding<IReadOnlyList<PrefabRef>> LoadedModules = new([]);
+    internal readonly ImpBinding<IReadOnlyCollection<PrefabRef>> LoadedItems = new([]);
+    internal readonly ImpBinding<IReadOnlyCollection<PrefabRef>> LoadedValuables = new([]);
     internal readonly ImpBinding<IReadOnlyCollection<ExtendedEnemySetup>> LoadedEntities = new([]);
 
     // internal readonly ImpBinding<IReadOnlyCollection<Item>> LoadedScrap = new([]);
@@ -252,8 +251,8 @@ internal class ObjectManager : ImpLifecycleObject
              */
             var parent =
                 enemyType.spawnObjects.Count > 1
-                    ? enemyType.spawnObjects[1].GetComponent<EnemyParent>()
-                    : enemyType.spawnObjects[0].GetComponent<EnemyParent>();
+                    ? enemyType.spawnObjects[1].Prefab.GetComponent<EnemyParent>()
+                    : enemyType.spawnObjects[0].Prefab.GetComponent<EnemyParent>();
 
             if (!parent || loadedEntityNames.Contains(parent.enemyName)) continue;
 
@@ -271,13 +270,19 @@ internal class ObjectManager : ImpLifecycleObject
             loadedEntityNames.Add(parent.enemyName);
         }
 
-        var allItems = Resources.FindObjectsOfTypeAll<Item>().ToHashSet();
+        var allItems = StatsManager.instance.itemDictionary.Values.Select(x => x.prefab).OrderBy(x => x.PrefabName).ToList();
         var allLevels = Resources.FindObjectsOfTypeAll<Level>()
             .Where(level => !ImpConstants.LevelBlacklist.Contains(level.NarrativeName))
-            .ToList();
-        var allModules = Resources.FindObjectsOfTypeAll<Module>().OrderBy(module => module.name).ToList();
-
-        var allValuables = Valuables.GetValuables().Select(obj => obj.GetComponent<ValuableObject>()).ToHashSet();
+            .OrderBy(x => x.NarrativeName).ToList();
+        var allModules = RunManager.instance.levels.SelectMany(l => 
+            l.ModulesNormal1.Concat(l.ModulesNormal2).Concat(l.ModulesNormal3)
+                .Concat(l.ModulesPassage1).Concat(l.ModulesPassage2).Concat(l.ModulesPassage3)
+                .Concat(l.ModulesDeadEnd1).Concat(l.ModulesDeadEnd2).Concat(l.ModulesDeadEnd3)
+                .Concat(l.ModulesExtraction1).Concat(l.ModulesExtraction2).Concat(l.ModulesExtraction3)
+        ).OrderBy(x => x.PrefabName).ToList();
+        var allValuables = RunManager.instance.levels.SelectMany(l => l.ValuablePresets
+            .SelectMany(p => p.tiny.Concat(p.small).Concat(p.medium).Concat(p.big).Concat(p.wide).Concat(p.tall).Concat(p.veryTall)))
+            .OrderBy(x => x.PrefabName).ToList();
 
         LoadedItems.Set(allItems);
         LoadedLevels.Set(allLevels);
@@ -364,14 +369,13 @@ internal class ObjectManager : ImpLifecycleObject
         {
             foreach (var spawnObject in enemySetup.GetSortedSpawnObjects())
             {
-                if (!spawnObject)
+                if (!spawnObject.IsValid())
                 {
                     Imperium.IO.LogError($"[SPAWN] [R] Unable to spawn prefab for requested entity '{request.Name}'.");
                     continue;
                 }
 
-                var prefabId = ResourcesHelper.GetEnemyPrefabPath(spawnObject);
-                var obj = NetworkPrefabs.SpawnNetworkPrefab(prefabId, request.SpawnPosition, Quaternion.identity);
+                var obj = GameUtils.SpawnNetworkPrefab(spawnObject, request.SpawnPosition, Quaternion.identity);
                 if (!obj || !obj.TryGetComponent(out EnemyParent enemyParent)) continue;
 
                 enemyParent.SetupDone = true;
@@ -401,19 +405,17 @@ internal class ObjectManager : ImpLifecycleObject
     [ImpAttributes.HostOnly]
     private void OnSpawnItem(ItemSpawnRequest request, ulong clientId)
     {
-        var spawningItem = LoadedItems.Value.FirstOrDefault(item => item.itemName == request.Name);
+        var spawningItem = LoadedItems.Value.FirstOrDefault(item => item.PrefabName == request.Name);
 
-        if (!spawningItem)
+        if (spawningItem == null)
         {
             Imperium.IO.LogError($"[SPAWN] [R] Unable to find requested item '{request.Name}'.");
             return;
         }
 
-        var prefabId = ResourcesHelper.GetItemPrefabPath(spawningItem);
-
         for (var i = 0; i < request.Amount; i++)
         {
-            var obj = NetworkPrefabs.SpawnNetworkPrefab(prefabId, request.SpawnPosition, Quaternion.identity);
+            var obj = GameUtils.SpawnNetworkPrefab(spawningItem, request.SpawnPosition, Quaternion.identity);
             if (!obj)
             {
                 Imperium.IO.LogError($"[SPAWN] Failed to spawn item '{request.Name}'.");
@@ -439,19 +441,17 @@ internal class ObjectManager : ImpLifecycleObject
     [ImpAttributes.HostOnly]
     private void OnSpawnValuable(ValuableSpawnRequest request, ulong clientId)
     {
-        var spawningValuable = LoadedValuables.Value.FirstOrDefault(valuable => valuable.name == request.Name);
+        var spawningValuable = LoadedValuables.Value.FirstOrDefault(valuable => valuable.PrefabName == request.Name);
 
-        if (!spawningValuable)
+        if (spawningValuable == null)
         {
             Imperium.IO.LogError($"[SPAWN] [R] Unable to find requested valuable '{request.Name}'.");
             return;
         }
 
-        var prefabId = ResourcesHelper.GetValuablePrefabPath(spawningValuable);
-
         for (var i = 0; i < request.Amount; i++)
         {
-            var obj = NetworkPrefabs.SpawnNetworkPrefab(prefabId, request.SpawnPosition, Quaternion.identity);
+            var obj = GameUtils.SpawnNetworkPrefab(spawningValuable, request.SpawnPosition, Quaternion.identity);
             if (!obj)
             {
                 Imperium.IO.LogError($"[SPAWN] Failed to spawn valuable '{request.Name}'.");

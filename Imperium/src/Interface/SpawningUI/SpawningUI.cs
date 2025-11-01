@@ -85,7 +85,7 @@ internal class SpawningUI : BaseUI
             var spawningEntry = spawningEntryObject.AddComponent<SpawningObjectEntry>();
             spawningEntry.Init(
                 SpawnObjectType.Item,
-                item.itemName,
+                item.PrefabName,
                 () => Spawn(spawningEntry, 1, -1),
                 _ => SelectItemAndDeselectOthers(currentIndex),
                 typeDisplayNames,
@@ -101,7 +101,7 @@ internal class SpawningUI : BaseUI
             var spawningEntry = spawningEntryObject.AddComponent<SpawningObjectEntry>();
             spawningEntry.Init(
                 SpawnObjectType.Valuable,
-                valuable.name,
+                valuable.PrefabName,
                 () => Spawn(spawningEntry, 1, -1),
                 _ => SelectItemAndDeselectOthers(currentIndex),
                 typeDisplayNames,
