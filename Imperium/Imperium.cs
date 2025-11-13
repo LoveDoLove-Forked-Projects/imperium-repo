@@ -28,7 +28,6 @@ using ImpSettings = Imperium.Core.ImpSettings;
 namespace Imperium;
 
 [BepInDependency("com.rune580.reposteamnetworking")]
-[BepInDependency("REPOLib")]
 [BepInDependency("giosuel.Librarium")]
 [BepInDependency("com.sinai.universelib", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("com.sinai.unityexplorer", BepInDependency.DependencyFlags.SoftDependency)]
@@ -163,7 +162,7 @@ public class Imperium : BaseUnityPlugin
         // Settings = new ImpSettings(configFile);
 
         // Register camera update when scene is loaded
-        ActiveCamera = new ImpExternalBinding<Camera, bool>(() => PlayerAvatar.instance.localCamera, IsLevelLoaded);
+        ActiveCamera = new ImpExternalBinding<Camera, bool>(() => Camera.main, IsLevelLoaded);
 
         IO.BindNotificationSettings(Settings);
         Networking.BindAllowClients(Settings.Preferences.AllowClients);

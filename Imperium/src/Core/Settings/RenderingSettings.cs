@@ -4,6 +4,7 @@ using BepInEx.Configuration;
 using Imperium.Core.Lifecycle;
 using Librarium;
 using Librarium.Binding;
+using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 
 #endregion
@@ -55,7 +56,7 @@ internal class RenderingSettings(ConfigFile config) : SettingsContainer(config)
         "Rendering.PostProcessing",
         "Darkness",
         true,
-        primaryUpdate: value => PlayerAvatar.instance.localCamera.GetComponent<PostProcessLayer>().enabled = value
+        primaryUpdate: value => Camera.main.GetComponent<PostProcessLayer>().enabled = value
     );
 
     internal readonly ImpConfig<bool> PostOverlay = new(

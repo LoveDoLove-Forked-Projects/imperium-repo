@@ -1,5 +1,16 @@
 # Changelog
 
+## Imperium v0.3.0 - Bug fixes
+
+- Fixed compatibility with the version v0.3.0 of the game.
+- Fixed default value for night vision.
+- Fixed Imperium not working in singleplayer when using a mod that enables the lobby menu for singleplayer.
+- Removed REPOLib dependency.
+
+### Compatibility
+
+Compatible with REPO release version  `v0.3.0` and beta version `v0.3.1.2_beta`.
+
 ## Imperium v0.2.4 - Bug fixes
 
 ### Bug Fixes
