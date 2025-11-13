@@ -308,19 +308,19 @@ internal class ConsoleManager : ImpLifecycleObject
         foreach (var item in Imperium.ObjectManager.LoadedItems.Value)
         {
             var wasAdded = registeredSpawnCommands.TryAdd(
-                NormalizeCommand(item.itemName),
-                new ImpCommandSpawn(item.itemName, item.itemName, SpawnObjectType.Item)
+                NormalizeCommand(item.PrefabName),
+                new ImpCommandSpawn(item.PrefabName, item.PrefabName, SpawnObjectType.Item)
             );
-            if (!wasAdded) Imperium.IO.LogWarning($"[CMD] Skipped duplicate item command: {item.itemName}");
+            if (!wasAdded) Imperium.IO.LogWarning($"[CMD] Skipped duplicate item command: {item.PrefabName}");
         }
 
         foreach (var valuable in Imperium.ObjectManager.LoadedValuables.Value)
         {
             var wasAdded = registeredSpawnCommands.TryAdd(
-                NormalizeCommand(valuable.name),
-                new ImpCommandSpawn(valuable.name, valuable.name, SpawnObjectType.Valuable)
+                NormalizeCommand(valuable.PrefabName),
+                new ImpCommandSpawn(valuable.PrefabName, valuable.PrefabName, SpawnObjectType.Valuable)
             );
-            if (!wasAdded) Imperium.IO.LogWarning($"[CMD] Skipped duplicate valuable command: {valuable.name}");
+            if (!wasAdded) Imperium.IO.LogWarning($"[CMD] Skipped duplicate valuable command: {valuable.PrefabName}");
         }
     }
 

@@ -35,7 +35,7 @@ public class ImpFreecam : ImpScript
 
     private void Awake()
     {
-        gameplayCamera = PlayerAvatar.instance.localCamera;
+        gameplayCamera = Camera.main;
 
         camera = gameObject.AddComponent<Camera>();
         camera.name = "Imp_Freecam";
@@ -171,7 +171,7 @@ public class ImpFreecam : ImpScript
         camera.enabled = false;
         enabled = false;
 
-        Imperium.ActiveCamera.Set(PlayerAvatar.instance.localCamera);
+        Imperium.ActiveCamera.Set(Camera.main);
         Imperium.InputBlocker.Unblock(this);
 
         PlayerManager.ToggleLocalAvatar(Imperium.Settings.Rendering.AvatarInMain.Value);

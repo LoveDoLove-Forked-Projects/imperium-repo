@@ -20,9 +20,8 @@ internal static class LevelGeneratorPatch
         }
         else
         {
-            var customModule = Imperium.ObjectManager.LoadedModules.Value
-                .First(module => module.name == Imperium.GameManager.ModuleOverride.Value);
-            __instance.DebugModule = customModule.gameObject;
+            var customModule = Imperium.ObjectManager.LoadedModules.Value.FirstOrDefault(module => module.PrefabName == Imperium.GameManager.ModuleOverride.Value);
+            __instance.DebugModule = customModule;
 
             switch ((Module.Type)Imperium.GameManager.OverrideModuleType.Value)
             {
